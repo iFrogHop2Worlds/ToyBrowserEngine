@@ -1,0 +1,9 @@
+[package]
+name = "ToyBroswerEngine"
+version = "0.1.0"
+edition = "2021"
+authors = ["Billy Best <bill@tsuga.digital>"]
+
+[dependencies]
+getopts = "0.2.21"
+image = "0.24.8"
