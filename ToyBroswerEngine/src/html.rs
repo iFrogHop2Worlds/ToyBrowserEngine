@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
-pub fn parse(source: String) -> ToyBroswerEngine::dom::Node {
+pub fn parse(source: String) -> crate::dom::Node {
     let mut nodes = Parser { pos: 0, input: source}.parse_nodes();
 
     if nodes.len() == 1 {
         nodes.swap_remove(0)
     } else {
-        ToyBroswerEngine::dom::elem("html".to_owned(), HashMap::new(), nodes)
+        crate::dom::elem("html".to_owned(), HashMap::new(), nodes)
     }
 }
 
@@ -16,7 +16,7 @@ pub struct Parser {
 }
 
 impl Parser {
-    pub fn parse_nodes(&mut self) -> Vec<ToyBroswerEngine::dom::Node> {
+    pub fn parse_nodes(&mut self) -> Vec<crate::dom::Node> {
         let mut nodes = vec!();
         loop {
             self.consume_whitespace();
@@ -28,8 +28,8 @@ impl Parser {
         nodes
     }
 
-    //parse single node
-    pub fn parse_node(&mut self) -> ToyBroswerEngine::dom::Node {
+    //parse single node, Simple: if the first char is < it's an element otherwise a text node.
+    pub fn parse_node(&mut self) -> crate::dom::Node {
         match self.next_char() {
             '<' => self.parse_element(),
             _ => self.parse_text()
@@ -37,7 +37,7 @@ impl Parser {
     }
 
     // parsing a single element, including open tag , contents and closing tag
-    pub fn parse_element(&mut self) -> ToyBroswerEngine::dom::Node {
+    pub fn parse_element(&mut self) -> crate::dom::Node {
         // open tag
         assert_eq!(self.consume_char(), '<');
         let tag_name = self.parse_tag_name();
@@ -51,7 +51,7 @@ impl Parser {
         assert_eq!(self.parse_tag_name(), tag_name);
         assert_eq!(self.consume_char(), '>');
 
-        ToyBroswerEngine::dom::elem(tag_name, attrs, children)
+        crate::dom::elem(tag_name, attrs, children)
     }
 
     pub fn parse_tag_name(&mut self) -> String {
@@ -62,7 +62,7 @@ impl Parser {
     }
 
     // parse a list of name = value pairs, seperated by whitespace
-    pub fn parse_attributes(&mut self) -> ToyBroswerEngine::dom::AtterMap {
+    pub fn parse_attributes(&mut self) -> crate::dom::AtterMap {
         let mut attributes = HashMap::new();
         loop {
             self.consume_whitespace();
@@ -90,19 +90,19 @@ impl Parser {
         value
     }
     // parses a text node
-    pub fn parse_text(&mut self) -> ToyBroswerEngine::dom::Node {
-        ToyBroswerEngine::dom::text(self.consume_while(|c| c != '<'))
+    pub fn parse_text(&mut self) -> crate::dom::Node {
+        crate::dom::text(self.consume_while(|c| c != '<'))
     }   
 
     pub fn consume_whitespace(&mut self) {
         self.consume_while(char::is_whitespace);
     }
     // consumes characters until the test returns false.
-    pub fn consume_while<F>(&mut self, test: F) -> String
-        where F: Fn(char) -> bool {
+    pub fn consume_while<F>(&mut self, test: F) -> String //<F> is a generic type parameter
+        where F: Fn(char) -> bool { // F: is a function that takes a string and returns a bool
             let mut result = String::new();
-            while !self.eof() && test(self.next_char()){
-                result.push(self.consume_char());
+            while !self.eof() && test(self.next_char()){ // while not at the end Fn returns true
+                result.push(self.consume_char()); // consume the character and append to result.
             }
             result
     }
