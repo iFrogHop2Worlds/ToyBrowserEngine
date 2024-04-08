@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use crate::css::{Rule, StyleSheet};
 use crate::css::{Selector, SimpleSelector, Specificity, Value};
 use crate::css::Selector::Simple;
+use crate::css::Value::Keyword;
 use crate::dom::{ElementData, Node};
 use crate::dom::NodeType::{Element, Text};
 
@@ -15,10 +16,31 @@ use crate::dom::NodeType::{Element, Text};
 type PropertyMap = HashMap<String, Value>;
 
 // A node with associated style data
-struct StyleNode<'a> {
+pub struct StyleNode<'a> {
     node: &'a Node,
     specified_values: PropertyMap,
-    children: Vec<StyleNode<'a>>,
+    pub(crate) children: Vec<StyleNode<'a>>,
+}
+
+enum Display {
+    Inline,
+    Block,
+    None,
+}
+impl StyleNode<'_> {
+    fn value(&self, name: &str) -> Option<Value> {
+        self.specified_values.get(name).map(|v| v.clone())
+    }
+    pub(crate) fn display(&self) -> Display {
+        match self.value("display") {
+            Some(Keyword(s)) => match &*s {
+                "block" => Display::Block,
+                "none" => Display::None,
+                _ => Display::Inline
+            },
+            _ => Display::Inline
+        }
+    }
 }
 
 fn matches(elem: &ElementData, selector: &Selector) -> bool {
