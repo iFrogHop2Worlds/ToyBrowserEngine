@@ -22,7 +22,7 @@ pub struct StyleNode<'a> {
     pub(crate) children: Vec<StyleNode<'a>>,
 }
 
-enum Display {
+pub enum Display {
     Inline,
     Block,
     None,
