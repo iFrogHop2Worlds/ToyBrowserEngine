@@ -28,7 +28,7 @@ pub enum Display {
     None,
 }
 impl StyleNode<'_> {
-    fn value(&self, name: &str) -> Option<Value> {
+    pub(crate) fn value(&self, name: &str) -> Option<Value> {
         self.specified_values.get(name).map(|v| v.clone())
     }
     pub(crate) fn display(&self) -> Display {
@@ -40,6 +40,13 @@ impl StyleNode<'_> {
             },
             _ => Display::Inline
         }
+    }
+
+    /// Return the specified value of property `name`, or property `fallback_name` if that doesn't
+    /// exist, or value `default` if neither does.
+    pub fn lookup(&self, name: &str, fallback_name: &str, default: &Value) -> Value {
+        self.value(name).unwrap_or_else(|| self.value(fallback_name)
+            .unwrap_or_else(|| default.clone()))
     }
 }
 
