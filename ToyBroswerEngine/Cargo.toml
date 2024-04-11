@@ -5,3 +5,6 @@ edition = "2021"
 authors = ["Billy Best <bill@tsuga.digital>"]
 
 [dependencies]
+num-traits = "0.2.18"
+image = "0.25.1"
+getopts = "0.2.21"

@@ -6,3 +6,7 @@ pub mod html;
 pub mod css;
 #[path = "./style.rs"]
 pub mod style;
+#[path = "./layout.rs"]
+pub mod layout;
+#[path = "./painting.rs"]
+pub mod painting;

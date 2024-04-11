@@ -3,11 +3,11 @@ use crate::css::Value::{Keyword, Length};
 use crate::layout::BoxType::{AnonymousBlock, BlockNode, InlineNode};
 use crate::style::{StyleNode, Display};
 #[derive(Clone, Copy, Default, Debug)]
-struct Dimensions {
-    content: Rect,
-    padding: EdgeSizes,
-    border: EdgeSizes,
-    margin: EdgeSizes
+pub struct Dimensions {
+    pub content: Rect,
+    pub padding: EdgeSizes,
+    pub border: EdgeSizes,
+    pub margin: EdgeSizes
 }
 
 #[derive(Default, Clone, Copy, Debug)]
@@ -19,17 +19,17 @@ pub struct Rect {
 }
 
 #[derive(Default, Clone, Copy, Debug)]
-struct EdgeSizes {
-    left: f32,
-    right: f32,
-    top: f32,
-    bottom: f32
+pub struct EdgeSizes {
+    pub(crate) left: f32,
+    pub(crate) right: f32,
+    pub(crate) top: f32,
+    pub(crate) bottom: f32
 }
 
-struct LayoutBox<'a> {
-    dimensions: Dimensions,
-    box_type: BoxType<'a>,
-    children: Vec<LayoutBox<'a>>
+pub struct LayoutBox<'a> {
+    pub dimensions: Dimensions,
+    pub box_type: BoxType<'a>,
+    pub children: Vec<LayoutBox<'a>>
 }
 
 impl<'a> LayoutBox<'a> {
@@ -196,7 +196,7 @@ impl Dimensions {
         self.content.expanded_by(self.padding)
     }
     // the area covered by the content area plus its padding and borders.
-    fn border_box(self) -> Rect {
+    pub(crate) fn border_box(self) -> Rect {
         self.padding_box().expanded_by(self.border)
     }
     // the area covered by the content area plus its padding, borders and margin
@@ -216,13 +216,13 @@ impl Rect {
     }
 }
 
-enum BoxType<'a> {
+pub enum BoxType<'a> {
     BlockNode(&'a StyleNode<'a>),
     InlineNode(&'a StyleNode<'a>),
     AnonymousBlock,
 }
 
-fn build_layout_tree<'a>(style_node: &'a StyleNode<'a>) -> LayoutBox<'a> {
+pub fn build_layout_tree<'a>(style_node: &'a StyleNode<'a>) -> LayoutBox<'a> {
     //create root box
     let mut root = LayoutBox::new(match style_node.display() {
         Display::Block => BlockNode(style_node),
@@ -239,6 +239,16 @@ fn build_layout_tree<'a>(style_node: &'a StyleNode<'a>) -> LayoutBox<'a> {
     }
 
     return root;
+}
+
+pub fn layout_tree<'a>(node: &'a StyleNode<'a>, mut containing_block: Dimensions) -> LayoutBox<'a> {
+    // The layout algorithm expects the container height to start at 0.
+    // TODO: Save the initial containing block height, for calculating percent heights.
+    containing_block.content.height = 0.0;
+
+    let mut root_box = build_layout_tree(node);
+    root_box.layout((&mut containing_block).into());
+    return root_box;
 }
 
 fn sum<I>(iter: I) -> f32 where I: Iterator<Item=f32> {

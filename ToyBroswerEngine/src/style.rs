@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::css::{Rule, StyleSheet};
+use crate::css::{Rule, Stylesheet};
 use crate::css::{Selector, SimpleSelector, Specificity, Value};
 use crate::css::Selector::Simple;
 use crate::css::Value::Keyword;
@@ -58,7 +58,7 @@ fn matches(elem: &ElementData, selector: &Selector) -> bool {
 
 fn matches_simple_selector(elem: &ElementData, selector: &SimpleSelector) -> bool {
     // check type selector
-    if selector.tage_name.iter().any(|name| elem.tag_name != *name) {
+    if selector.tag_name.iter().any(|name| elem.tag_name != *name) {
         return false;
     }
     // check ID Selector
@@ -81,11 +81,11 @@ fn match_rule<'a>(elem: &ElementData, rule: &'a Rule) -> Option<MatchedRule<'a>>
         .map(|selector| (selector.specificity(), rule))
 }
 
-fn matching_rules<'a>(elem: &ElementData, stylesheet: &'a StyleSheet) -> Vec<MatchedRule<'a>> {
+fn matching_rules<'a>(elem: &ElementData, stylesheet: &'a Stylesheet) -> Vec<MatchedRule<'a>> {
     stylesheet.rules.iter().filter_map(|rule| match_rule(elem, rule)).collect()
 }
 
-fn specified_values(elem: &ElementData, style_sheet: &StyleSheet) -> PropertyMap {
+fn specified_values(elem: &ElementData, style_sheet: &Stylesheet) -> PropertyMap {
     let mut values = HashMap::new();
     let mut rules = matching_rules(elem, style_sheet);
 
@@ -99,7 +99,7 @@ fn specified_values(elem: &ElementData, style_sheet: &StyleSheet) -> PropertyMap
     return values;
 }
 
-pub fn style_tree<'a>(root: &'a Node, stylesheet: &'a StyleSheet) -> StyleNode<'a> {
+pub fn style_tree<'a>(root: &'a Node, stylesheet: &'a Stylesheet) -> StyleNode<'a> {
     StyleNode {
         node: root,
         specified_values: match root.node_type {
